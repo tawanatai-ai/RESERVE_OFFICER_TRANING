@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ศูนย์ฝึกนักศึกษาวิชาทหาร - ระบบเช็คชื่อและจิตอาสา</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Sarabun', sans-serif; }
+    </style>
+</head>
+<body class="bg-stone-900 text-stone-100 min-h-screen flex flex-col">
+
+    <!-- Navbar / Header -->
+    <header class="bg-stone-800 border-b border-stone-700 shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-full bg-amber-600 flex items-center justify-center font-bold text-white shadow-inner">🛡️</div>
+                <div>
+                    <h1 class="text-lg font-bold tracking-wide text-amber-500">ศูนย์ฝึกนักศึกษาวิชาทหาร</h1>
+                    <p class="text-xs text-stone-400">ระบบเช็คชื่อ บันทึกจิตอาสา และจัดการ นศท.</p>
+                </div>
+            </div>
+
+            <!-- Role / User Info & Quick Switch -->
+            <div id="nav-user-section" class="flex items-center gap-3">
+                <!-- จะถูกเรนเดอร์ด้วย JavaScript ตามสถานะล็อกอิน -->
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="flex-grow max-w-7xl w-full mx-auto p-4 sm:p-6">
+        
+        <!-- 1. AUTH / LANDING VIEW (ถ้ายังไม่เข้าสู่ระบบ) -->
+        <div id="view-auth" class="max-w-md mx-auto bg-stone-800 border border-stone-700 rounded-2xl shadow-2xl p-6 sm:p-8 mt-6">
+            <div class="text-center mb-6">
+                <div class="w-16 h-16 bg-stone-900 border-2 border-amber-600 rounded-full flex items-center justify-center mx-auto mb-3 shadow-lg">
+                    <span class="text-2xl">🛡️</span>
+                </div>
+                <h2 class="text-xl font-bold text-stone-100">ศูนย์ฝึกนักศึกษาวิชาทหาร</h2>
+                <p class="text-xs text-stone-400">ระบบเช็คชื่อ & บันทึกกิจกรรมจิตอาสาออนไลน์</p>
+            </div>
+
+            <!-- Tabs -->
+            <div class="flex border-b border-stone-700 mb-6">
+                <button onclick="switchAuthTab('login')" id="tab-login-btn" class="flex-1 pb-3 text-sm font-semibold text-amber-500 border-b-2 border-amber-500 transition">เข้าสู่ระบบ</button>
+                <button onclick="switchAuthTab('register')" id="tab-reg-btn" class="flex-1 pb-3 text-sm font-semibold text-stone-400 hover:text-stone-200 transition">ลงทะเบียน นศท.</button>
+            </div>
+
+            <!-- Login Form -->
+            <div id="form-login" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-medium text-stone-300 mb-1">เลขประจำตัว นศท. / รหัสผ่าน</label>
+                    <input type="text" id="login-id" placeholder="เช่น 66001 หรือ T001" class="w-full bg-stone-900 border border-stone-700 rounded-lg px-4 py-2.5 text-sm text-stone-100 focus:outline-none focus:border-amber-500">
+                </div>
+                <button onclick="handleLogin()" class="w-full bg-emerald-700 hover:bg-emerald-600 text-white font-medium py-2.5 rounded-lg transition shadow-md">
+                    เข้าสู่ระบบ
+                </button>
+
+                <!-- Quick Test Logins -->
+                <div class="pt-4 border-t border-stone-700 text-center">
+                    <p class="text-xs text-stone-400 mb-2">ทดสอบเข้าสู่ระบบด่วน:</p>
+                    <div class="flex justify-center gap-2">
+                        <button onclick="quickLogin('teacher')" class="bg-amber-600/20 border border-amber-600/50 text-amber-400 text-xs px-3 py-1.5 rounded-md hover:bg-amber-600/30 transition">👑 คุณครู</button>
+                        <button onclick="quickLogin('head')" class="bg-blue-600/20 border border-blue-600/50 text-blue-400 text-xs px-3 py-1.5 rounded-md hover:bg-blue-600/30 transition">🎖️ หัวหน้าหมู่</button>
+                        <button onclick="quickLogin('student')" class="bg-stone-700 text-stone-300 text-xs px-3 py-1.5 rounded-md hover:bg-stone-600 transition">🌲 นศท. ทั่วไป</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Register Form -->
+            <div id="form-register" class="space-y-4 hidden">
+                <div>
+                    <label class="block text-xs font-medium text-stone-300 mb-1">รหัสประจำตัว / รหัสผ่าน</label>
+                    <input type="text" id="reg-id" placeholder="เช่น 66001" class="w-full bg-stone-900 border border-stone-700 rounded-lg px-4 py-2 text-sm text-stone-100 focus:outline-none focus:border-amber-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-stone-300 mb-1">ชื่อ - สกุล</label>
+                    <input type="text" id="reg-name" placeholder="เช่น นายสมชาย ใจดี" class="w-full bg-stone-900 border border-stone-700 rounded-lg px-4 py-2 text-sm text-stone-100 focus:outline-none focus:border-amber-500">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-medium text-stone-300 mb-1">ชั้นปี</label>
+                        <select id="reg-year" class="w-full bg-stone-900 border border-stone-700 rounded-lg px-3 py-2 text-sm text-stone-100 focus:outline-none focus:border-amber-500">
+                            <option value="นศท.1">นศท. ชั้นปี 1</option>
+                            <option value="นศท.2">นศท. ชั้นปี 2</option>
+                            <option value="นศท.3">นศท. ชั้นปี 3</option>
+                            <option value="นศท.4">นศท. ชั้นปี 4</option>
+                            <option value="นศท.5">นศท. ชั้นปี 5</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-stone-300 mb-1">บทบาท / ยศ</label>
+                        <select id="reg-role" class="w-full bg-stone-900 border border-stone-700 rounded-lg px-3 py-2 text-sm text-stone-100 focus:outline-none focus:border-amber-500">
+                            <option value="student">นศท. ทั่วไป</option>
+                            <option value="head">หัวหน้าหมู่</option>
+                            <option value="teacher">คุณครู</option>
+                        </select>
+                    </div>
+                </div>
+                <button onclick="handleRegister()" class="w-full bg-amber-600 hover:bg-amber-500 text-stone-950 font-bold py-2.5 rounded-lg transition shadow-md">
+                    ลงทะเบียนเข้าสู่ระบบ
+                </button>
+            </div>
+        </div>
+
+        <!-- 2. MAIN APP DASHBOARD VIEW (หลังเข้าสู่ระบบ) -->
+        <div id="view-dashboard" class="hidden space-y-6">
+            
+            <!-- Navigation Tabs for Dashboard -->
+            <div class="flex overflow-x-auto bg-stone-800 p-1.5 rounded-xl border border-stone-700 gap-1">
+                <button onclick="switchMainTab('attendance')" id="m-tab-att" class="flex-1 min-w-[120px] py-2 px-4 rounded-lg text-sm font-medium transition bg-amber-600 text-stone-950 font-bold shadow">เช็คชื่อ นศท.</button>
+                <button onclick="switchMainTab('volunteer')" id="m-tab-vol" class="flex-1 min-w-[120px] py-2 px-4 rounded-lg text-sm font-medium transition text-stone-300 hover:bg-stone-700">จิตอาสา</button>
+                <button onclick="switchMainTab('profile')" id="m-tab-pro" class="flex-1 min-w-[120px] py-2 px-4 rounded-lg text-sm font-medium transition text-stone-300 hover:bg-stone-700">โปรไฟล์ส่วนตัว</button>
+                <button onclick="switchMainTab('teacher-tools')" id="m-tab-tch" class="hidden flex-1 min-w-[120px] py-2 px-4 rounded-lg text-sm font-medium transition text-stone-300 hover:bg-stone-700">จัดการข้อมูล (ครู)</button>
+            </div>
+
+            <!-- SECTION A: ATTENDANCE (เช็คชื่อ) -->
+            <div id="section-attendance" class="space-y-4">
+                <div class="bg-stone-800 border border-stone-700 rounded-xl p-4 sm:p-6 shadow-lg flex flex-col md:flex-row justify-between items-center gap-4">
+                    <div>
+                        <h2 class="text-lg font-bold text-stone-100 flex items-center gap-2">
+                            <span>📋 ระบบเช็คชื่อ นศท.</span>
+                        </h2>
+                        <p class="text-xs text-stone-400">บันทึกเวลาเรียนแยกตามช่วงเวลา (คุณครูและหัวหน้าหมู่สามารถเช็คชื่อได้)</p>
+                    </div>
+
+                    <!-- ช่วงเวลา (เช้า / เย็น) และ ปุ่มกรองชั้นปี -->
+                    <div class="flex flex-wrap items-center gap-2">
+                        <div class="bg-stone-900 p-1 rounded-lg border border-stone-700 flex">
+                            <button onclick="setSessionTime('morning')" id="btn-session-morn" class="px-3 py-1.5 rounded-md text-xs font-semibold bg-amber-600 text-stone-950 transition">☀️ ช่วงเช้า</button>
+                            <button onclick="setSessionTime('afternoon')" id="btn-session-aft" class="px-3 py-1.5 rounded-md text-xs font-semibold text-stone-400 hover:text-white transition">🌙 ช่วงเย็น</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ปุ่มกรองชั้นปี (Year Filter Buttons) -->
+                <div class="flex flex-wrap items-center gap-2 bg-stone-800/60 p-3 rounded-xl border border-stone-700">
+                    <span class="text-xs font-medium text-stone-400 mr-2">กรองตามชั้นปี:</span>
+                    <button onclick="filterByYear('all')" id="filter-yr-all" class="px-3 py-1 rounded-lg text-xs font-medium bg-amber-600 text-stone-950 transition">ทั้งหมด</button>
+                    <button onclick="filterByYear('นศท.1')" id="filter-yr-1" class="px-3 py-1 rounded-lg text-xs font-medium bg-stone-700 text-stone-300 hover:bg-stone-600 transition">นศท.1</button>
+                    <button onclick="filterByYear('นศท.2')" id="filter-yr-2" class="px-3 py-1 rounded-lg text-xs font-medium bg-stone-700 text-stone-300 hover:bg-stone-600 transition">นศท.2</button>
+                    <button onclick="filterByYear('นศท.3')" id="filter-yr-3" class="px-3 py-1 rounded-lg text-xs font-medium bg-stone-700 text-stone-300 hover:bg-stone-600 transition">นศท.3</button>
+                    <button onclick="filterByYear('นศท.4')" id="filter-yr-4" class="px-3 py-1 rounded-lg text-xs font-medium bg-stone-700 text-stone-300 hover:bg-stone-600 transition">นศท.4</button>
+                    <button onclick="filterByYear('นศท.5')" id="filter-yr-5" class="px-3 py-1 rounded-lg text-xs font-medium bg-stone-700 text-stone-300 hover:bg-stone-600 transition">นศท.5</button>
+                </div>
+
+                <!-- ตารางรายชื่อเช็คชื่อ -->
+                <div class="bg-stone-800 border border-stone-700 rounded-xl overflow-hidden shadow-xl">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-stone-900 border-b border-stone-700 text-stone-400 text-xs uppercase tracking-wider">
+                                    <th class="p-3.5">รหัส นศท.</th>
+                                    <th class="p-3.5">ชื่อ - สกุล</th>
+                                    <th class="p-3.5">ชั้นปี / บทบาท</th>
+                                    <th class="p-3.5 text-center">สถิติขาด/ลา</th>
+                                    <th class="p-3.5 text-center">สถานะการเลื่อนชั้นปี</th>
+                                    <th class="p-3.5 text-center">สถานะ (<span id="current-session-label">ช่วงเช้า</span>)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="attendance-table-body" class="divide-y divide-stone-700 text-sm">
+                                <!-- เรนเดอร์ด้วย JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION B: VOLUNTEER (จิตอาสา) -->
+            <div id="section-volunteer" class="hidden space-y-6">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- ฟอร์มส่งจิตอาสา -->
+                    <div class="bg-stone-800 border border-stone-700 rounded-xl p-5 shadow-lg space-y-4">
+                        <h3 class="text-md font-bold text-stone-100 flex items-center gap-2"><span>📝 บันทึกกิจกรรมจิตอาสา</span></h3>
+                        <p class="text-xs text-stone-400">กรอกรายละเอียดกิจกรรมและแนบหลักฐานรูปถ่ายเพื่อรอคุณครูตรวจสอบ</p>
+                        
+                        <div class="space-y-3">
+                            <div>
+                                <label class="block text-xs font-medium text-stone-300 mb-1">ชื่องานกิจกรรม</label>
+                                <input type="text" id="vol-title" placeholder="เช่น พัฒนาวัดป่าสาละวัน" class="w-full bg-stone-900 border border-stone-700 rounded-lg px-3 py-2 text-sm text-stone-100 focus:outline-none focus:border-amber-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-stone-300 mb-1">จำนวนชั่วโมง</label>
+                                <input type="number" id="vol-hours" placeholder="เช่น 4" class="w-full bg-stone-900 border border-stone-700 rounded-lg px-3 py-2 text-sm text-stone-100 focus:outline-none focus:border-amber-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-stone-300 mb-1">อัปโหลดรูปภาพหลักฐาน</label>
+                                <input type="file" id="vol-img-file" accept="image/*" class="w-full text-xs text-stone-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-amber-600 file:text-stone-955 hover:file:bg-amber-500 cursor-pointer">
+                            </div>
+                            <button onclick="submitVolunteer()" class="w-full bg-amber-600 hover:bg-amber-500 text-stone-950 font-bold py-2.5 rounded-lg transition shadow-md text-sm">
+                                ส่งบันทึกจิตอาสา
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- รายการจิตอาสาทั้งหมด -->
+                    <div class="lg:col-span-2 bg-stone-800 border border-stone-700 rounded-xl p-5 shadow-lg space-y-4">
+                        <h3 class="text-md font-bold text-stone-100">📌 ประวัติและสถานะกิจกรรมจิตอาสา</h3>
+                        <div id="volunteer-list-container" class="space-y-3 max-h-[500px] overflow-y-auto pr-1">
+                            <!-- เรนเดอร์ด้วย JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION C: PROFILE (โปรไฟล์ส่วนตัว) -->
+            <div id="section-profile" class="hidden space-y-6">
+                <div class="bg-stone-800 border border-stone-700 rounded-xl p-6 shadow-xl max-w-2xl mx-auto">
+                    <div class="flex flex-col sm:flex-row items-center gap-6 pb-6 border-b border-stone-700">
+                        <div class="relative">
+                            <img id="profile-img-preview" src="https://via.placeholder.com/150" alt="Profile" class="w-24 h-24 rounded-full object-cover border-2 border-amber-500 shadow-md">
+                            <label for="profile-img-input" class="absolute bottom-0 right-0 bg-amber-600 text-stone-955 p-1.5 rounded-full cursor-pointer hover:bg-amber-500 shadow transition" title="เปลี่ยนรูปโปรไฟล์">
+                                📷
+                            </label>
+                            <input type="file" id="profile-img-input" accept="image/*" class="hidden" onchange="updateProfileImage(event)">
+                        </div>
+                        <div class="text-center sm:text-left">
+                            <h3 id="profile-name" class="text-xl font-bold text-stone-100">-</h3>
+                            <p id="profile-id-year" class="text-sm text-amber-400 font-medium">-</p>
+                            <p id="profile-role-badge" class="inline-block mt-2 px-3 py-0.5 rounded-full text-xs font-semibold bg-stone-700 text-stone-300">-</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4 mt-6">
+                        <div class="bg-stone-900 p-4 rounded-xl border border-stone-700 text-center">
+                            <p class="text-xs text-stone-400">ชั่วโมงจิตอาสาอนุมัติแล้ว</p>
+                            <p id="profile-total-vol" class="text-2xl font-bold text-emerald-400 mt-1">0 ชม.</p>
+                        </div>
+                        <div class="bg-stone-900 p-4 rounded-xl border border-stone-700 text-center">
+                            <p class="text-xs text-stone-400">สถิติ ขาด/ลา รวม</p>
+                            <p id="profile-total-absence" class="text-2xl font-bold text-rose-400 mt-1">0 ครั้ง</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION D: TEACHER TOOLS (จัดการข้อมูล - เฉพาะคุณครู) -->
+            <div id="section-teacher-tools" class="hidden space-y-6">
+                <div class="bg-stone-800 border border-stone-700 rounded-xl p-6 shadow-xl space-y-6">
+                    <div>
+                        <h2 class="text-lg font-bold text-amber-500 flex items-center gap-2"><span>⚙️ เมนูจัดการสำหรับคุณครู</span></h2>
+                        <p class="text-xs text-stone-400">จัดการข้อมูลรายชื่อ นศท. เปลี่ยนยศ เลื่อนขั้นปี ลบรายชื่อ และนำเข้าจาก Google Sheets</p>
+                    </div>
+
+                    <!-- นำเข้าข้อมูลจาก Google Sheets / ข้อความ -->
+                    <div class="bg-stone-900 p-4 rounded-xl border border-stone-700 space-y-3">
+                        <h3 class="text-sm font-bold text-stone-200">📥 นำเข้าข้อมูลรายชื่อจำนวนมาก (Google Sheets / CSV)</h3>
+                        <p class="text-xs text-stone-400">คัดลอกตารางจาก Google Sheets วางรูปแบบ: <code class="bg-stone-800 px-2 py-0.5 rounded text-amber-400">รหัส, ชื่อ-สกุล, ชั้นปี, ยศ/บทบาท</code></p>
+                        <textarea id="import-csv-text" rows="3" placeholder="66001, นายสมชาย ใจดี, นศท.1, student&#10;66002, นายสมหญิง รักสงบ, นศท.1, head" class="w-full bg-stone-800 border border-stone-700 rounded-lg p-3 text-xs text-stone-100 focus:outline-none focus:border-amber-500"></textarea>
+                        <button onclick="handleBulkImport()" class="bg-emerald-700 hover:bg-emerald-600 text-white font-medium px-4 py-2 rounded-lg text-xs transition shadow">
+                            นำเข้ารายชื่อเข้าสู่ระบบ
+                        </button>
+                    </div>
+
+                    <!-- ตารางจัดการรายชื่อ (เปลี่ยนยศ / ลบรายชื่อ / ปลดล็อกเลื่อนชั้นปี) -->
+                    <div class="space-y-3">
+                        <h3 class="text-sm font-bold text-stone-200">👥 จัดการรายชื่อ นศท. ทั้งหมดในระบบ</h3>
+                        <div class="overflow-x-auto border border-stone-700 rounded-xl">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="bg-stone-900 border-b border-stone-700 text-stone-400 text-xs uppercase">
+                                        <th class="p-3">รหัส</th>
+                                        <th class="p-3">ชื่อ - สกุล</th>
+                                        <th class="p-3">ชั้นปี</th>
+                                        <th class="p-3">บทบาท</th>
+                                        <th class="p-3 text-center">ขาด/ลา</th>
+                                        <th class="p-3 text-center">สถานะเลื่อนชั้น</th>
+                                        <th class="p-3 text-center">การจัดการ</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="teacher-manage-tbody" class="divide-y divide-stone-700 text-xs">
+                                    <!-- เรนเดอร์ด้วย JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        // --- DATABASE & STATE MANAGEMENT (LocalStorage) ---
+        let students = JSON.parse(localStorage.getItem('rotc_students')) || [];
+        let volunteers = JSON.parse(localStorage.getItem('rotc_volunteers')) || [];
+        let attendanceLog = JSON.parse(localStorage.getItem('rotc_attendance')) || {}; // { "YYYY-MM-DD_morning": { studentId: "present" } }
+        
+        let currentUser = JSON.parse(localStorage.getItem('rotc_current_user')) || null;
+        let currentSession = 'morning'; // 'morning' หรือ 'afternoon'
+        let currentFilterYear = 'all'; // กรองตามชั้นปี
+
+        function saveData() {
+            localStorage.setItem('rotc_students', JSON.stringify(students));
+            localStorage.setItem('rotc_volunteers', JSON.stringify(volunteers));
+            localStorage.setItem('rotc_attendance', JSON.stringify(attendanceLog));
+            localStorage.setItem('rotc_current_user', JSON.stringify(currentUser));
+        }
+
+        // --- AUTH & NAVIGATION ---
+        function switchAuthTab(tab) {
+            if(tab === 'login') {
+                document.getElementById('form-login').classList.remove('hidden');
+                document.getElementById('form-register').classList.add('hidden');
+                document.getElementById('tab-login-btn').className = "flex-1 pb-3 text-sm font-semibold text-amber-500 border-b-2 border-amber-500 transition";
+                document.getElementById('tab-reg-btn').className = "flex-1 pb-3 text-sm font-semibold text-stone-400 hover:text-stone-200 transition";
+            } else {
+                document.getElementById('form-login').classList.add('hidden');
+                document.getElementById('form-register').classList.remove('hidden');
+                document.getElementById('tab-login-btn').className = "flex-1 pb-3 text-sm font-semibold text-stone-400 hover:text-stone-200 transition";
+                document.getElementById('tab-reg-btn').className = "flex-1 pb-3 text-sm font-semibold text-amber-500 border-b-2 border-amber-500 transition";
+            }
+        }
+
+        function quickLogin(role) {
+            let sampleId = role === 'teacher' ? 'T001' : (role === 'head' ? 'H001' : 'S001');
+            let sampleName = role === 'teacher' ? 'ครูสมชาย (คุณครู)' : (role === 'head' ? 'หัวหน้าหมู่สมปอง' : 'นศท.สมศักดิ์ รักเรียน');
+            let sampleYear = 'นศท.3';
+
+            let found = students.find(s => s.id === sampleId);
+            if(!found) {
+                found = { id: sampleId, name: sampleName, year: sampleYear, role: role, img: 'https://via.placeholder.com/150' };
+                students.push(found);
+                saveData();
+            }
+            currentUser = found;
+            saveData();
+            renderApp();
+        }
+
+        function handleLogin() {
+            let id = document.getElementById('login-id').value.trim();
+            if(!id) { alert('กรุณากรอกรหัสประจำตัว'); return; }
+            let found = students.find(s => s.id === id);
+            if(!found) {
+                alert('ไม่พบรหัสนี้ในระบบ กรุณาลงทะเบียนก่อนครับ');
+                return;
+            }
+            currentUser = found;
+            saveData();
+            renderApp();
+        }
+
+        function handleRegister() {
+            let id = document.getElementById('reg-id').value.trim();
+            let name = document.getElementById('reg-name').value.trim();
+            let year = document.getElementById('reg-year').value;
+            let role = document.getElementById('reg-role').value;
+
+            if(!id || !name) { alert('กรุณากรอกข้อมูลให้ครบถ้วน'); return; }
+            if(students.some(s => s.id === id)) { alert('รหัสนี้มีอยู่ในระบบแล้ว'); return; }
+
+            let newStudent = { id, name, year, role, img: 'https://via.placeholder.com/150' };
+            students.push(newStudent);
+            currentUser = newStudent;
+            saveData();
+            alert('ลงทะเบียนสำเร็จ!');
+            renderApp();
+        }
+
+        function handleLogout() {
+            currentUser = null;
+            saveData();
+            renderApp();
+        }
+
+        function switchMainTab(tab) {
+            ['attendance', 'volunteer', 'profile', 'teacher-tools'].forEach(t => {
+                let el = document.getElementById(`section-${t}`);
+                if(el) el.classList.add('hidden');
+                let btn = document.getElementById(`m-tab-${t === 'teacher-tools' ? 'tch' : t[0]}`);
+                if(btn) btn.className = "flex-1 min-w-[120px] py-2 px-4 rounded-lg text-sm font-medium transition text-stone-300 hover:bg-stone-700";
+            });
+
+            document.getElementById(`section-${tab}`).classList.remove('hidden');
+            let activeBtn = document.getElementById(`m-tab-${tab === 'teacher-tools' ? 'tch' : tab[0]}`);
+            if(activeBtn) activeBtn.className = "flex-1 min-w-[120px] py-2 px-4 rounded-lg text-sm font-medium transition bg-amber-600 text-stone-955 font-bold shadow";
+        }
+
+        // --- ATTENDANCE LOGIC ---
+        function setSessionTime(session) {
+            currentSession = session;
+            document.getElementById('btn-session-morn').className = session === 'morning' ? "px-3 py-1.5 rounded-md text-xs font-semibold bg-amber-600 text-stone-955 transition" : "px-3 py-1.5 rounded-md text-xs font-semibold text-stone-400 hover:text-white transition";
+            document.getElementById('btn-session-aft').className = session === 'afternoon' ? "px-3 py-1.5 rounded-md text-xs font-semibold bg-amber-600 text-stone-950 transition" : "px-3 py-1.5 rounded-md text-xs font-semibold text-stone-400 hover:text-white transition";
+            document.getElementById('current-session-label').innerText = session === 'morning' ? 'ช่วงเช้า' : 'ช่วงเย็น';
+            renderAttendanceTable();
+        }
+
+        function filterByYear(year) {
+            currentFilterYear = year;
+            ['all', 'นศท.1', 'นศท.2', 'นศท.3', 'นศท.4', 'นศท.5'].forEach(y => {
+                let btnId = y === 'all' ? 'filter-yr-all' : `filter-yr-${y.replace('นศท.', '')}`;
+                let btn = document.getElementById(btnId);
+                if(btn) {
+                    btn.className = y === year ? "px-3 py-1 rounded-lg text-xs font-medium bg-amber-600 text-stone-950 transition" : "px-3 py-1 rounded-lg text-xs font-medium bg-stone-700 text-stone-300 hover:bg-stone-600 transition";
+                }
+            });
+            renderAttendanceTable();
+        }
+
+        function getTodayKey() {
+            let d = new Date();
+            return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}_${currentSession}`;
+        }
+
+        function countAbsences(studentId) {
+            let count = 0;
+            for(let key in attendanceLog) {
+                let status = attendanceLog[key][studentId];
+                if(status === 'absent' || status === 'leave') count++;
+            }
+            return count;
+        }
+
+        function markAttendance(studentId, status) {
+            let key = getTodayKey();
+            if(!attendanceLog[key]) attendanceLog[key] = {};
+            attendanceLog[key][studentId] = status;
+            saveData();
+            renderAttendanceTable();
+        }
+
+        function renderAttendanceTable() {
+            let tbody = document.getElementById('attendance-table-body');
+            tbody.innerHTML = '';
+
+            let filtered = students.filter(s => currentFilterYear === 'all' || s.year === currentFilterYear);
+
+            if(filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-stone-500">ยังไม่มีรายชื่อ นศท. ในระบบ กรุณาเพิ่มข้อมูลหรือลงทะเบียน</td></tr>`;
+                return;
+            }
+
+            let todayKey = getTodayKey();
+            let isTeacherOrHead = currentUser && (currentUser.role === 'teacher' || currentUser.role === 'head');
+
+            filtered.forEach(s => {
+                let stLog = attendanceLog[todayKey] && attendanceLog[todayKey][s.id] ? attendanceLog[todayKey][s.id] : '未';
+                let absences = countAbsences(s.id);
+                let isLocked = absences > 4; // เกิน 4 ครั้ง ล็อกเลื่อนชั้นปี
+
+                let row = document.createElement('tr');
+                row.className = "hover:bg-stone-750 transition";
+                row.innerHTML = `
+                    <td class="p-3.5 font-mono text-stone-300">${s.id}</td>
+                    <td class="p-3.5 font-medium text-stone-100 flex items-center gap-2">
+                        <img src="${s.img || 'https://via.placeholder.com/150'}" class="w-7 h-7 rounded-full object-cover">
+                        ${s.name}
+                    </td>
+                    <td class="p-3.5 text-stone-300">${s.year} <span class="text-xs text-stone-500">(${s.role === 'teacher' ? 'ครู' : (s.role === 'head' ? 'หัวหน้าหมู่' : 'นศท.')})</span></td>
+                    <td class="p-3.5 text-center font-bold ${absences > 4 ? 'text-rose-400' : 'text-stone-300'}">${absences} ครั้ง</td>
+                    <td class="p-3.5 text-center">
+                        ${isLocked ? '<span class="px-2 py-1 bg-rose-900/50 border border-rose-700 text-rose-300 rounded text-xs font-semibold">⚠️ ขาดเกิน 4 ครั้ง (ห้ามเลื่อนชั้น)</span>' : '<span class="px-2 py-1 bg-emerald-900/50 border border-emerald-700 text-emerald-300 rounded text-xs font-semibold">✅ ปกติ (เลื่อนชั้นได้)</span>'}
+                    </td>
+                    <td class="p-3.5 text-center">
+                        ${isTeacherOrHead ? `
+                            <div class="inline-flex gap-1">
+                                <button onclick="markAttendance('${s.id}', 'present')" class="px-2 py-1 rounded text-xs ${stLog==='present'?'bg-emerald-600 text-white font-bold':'bg-stone-700 text-stone-300 hover:bg-stone-600'}">มา</button>
+                                <button onclick="markAttendance('${s.id}', 'late')" class="px-2 py-1 rounded text-xs ${stLog==='late'?'bg-amber-600 text-white font-bold':'bg-stone-700 text-stone-300 hover:bg-stone-600'}">สาย</button>
+                                <button onclick="markAttendance('${s.id}', 'leave')" class="px-2 py-1 rounded text-xs ${stLog==='leave'?'bg-blue-600 text-white font-bold':'bg-stone-700 text-stone-300 hover:bg-stone-600'}">ลา</button>
+                                <button onclick="markAttendance('${s.id}', 'absent')" class="px-2 py-1 rounded text-xs ${stLog==='absent'?'bg-rose-600 text-white font-bold':'bg-stone-700 text-stone-300 hover:bg-stone-600'}">ขาด</button>
+                            </div>
+                        ` : `
+                            <span class="text-xs px-2 py-1 rounded ${stLog==='present'?'bg-emerald-900 text-emerald-300':(stLog==='absent'?'bg-rose-900 text-rose-300':'bg-stone-700 text-stone-400')}">
+                                ${stLog==='present'?'มาเรียน':(stLog==='late'?'มาสาย':(stLog==='leave'?'ลา':(stLog==='absent'?'ขาดเรียน':'ยังไม่เช็ค')))}
+                            </span>
+                        `}
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // --- VOLUNTEER LOGIC ---
+        function submitVolunteer() {
+            let title = document.getElementById('vol-title').value.trim();
+            let hours = parseInt(document.getElementById('vol-hours').value);
+            let fileInput = document.getElementById('vol-img-file');
+
+            if(!title || isNaN(hours)) { alert('กรุณากรอกข้อมูลให้ครบถ้วน'); return; }
+
+            let reader = new FileReader();
+            if(fileInput.files && fileInput.files[0]) {
+                reader.readAsDataURL(fileInput.files[0]);
+                reader.onload = function(e) {
+                    saveVolRecord(title, hours, e.target.result);
+                }
+            } else {
+                saveVolRecord(title, hours, 'https://via.placeholder.com/300?text=Volunteer');
+            }
+        }
+
+        function saveVolRecord(title, hours, imgUrl) {
+            let newVol = {
+                id: 'V' + Date.now(),
+                studentId: currentUser.id,
+                studentName: currentUser.name,
+                title,
+                hours,
+                img: imgUrl,
+                status: 'pending' // pending, approved, rejected
+            };
+            volunteers.push(newVol);
+            saveData();
+            document.getElementById('vol-title').value = '';
+            document.getElementById('vol-hours').value = '';
+            document.getElementById('vol-img-file').value = '';
+            alert('ส่งบันทึกจิตอาสาเรียบร้อยแล้ว รอคุณครูตรวจสอบ');
+            renderVolunteerList();
+        }
+
+        function updateVolStatus(vId, status) {
+            let v = volunteers.find(item => item.id === vId);
+            if(v) {
+                v.status = status;
+                saveData();
+                renderVolunteerList();
+            }
+        }
+
+        function renderVolunteerList() {
+            let container = document.getElementById('volunteer-list-container');
+            container.innerHTML = '';
+
+            let list = currentUser.role === 'teacher' ? volunteers : volunteers.filter(v => v.studentId === currentUser.id);
+
+            if(list.length === 0) {
+                container.innerHTML = `<p class="text-xs text-stone-500 text-center py-6">ยังไม่มีประวัติกิจกรรมจิตอาสา</p>`;
+                return;
+            }
+
+            list.forEach(v => {
+                let badgeColor = v.status === 'approved' ? 'bg-emerald-900/50 text-emerald-400 border-emerald-700' : (v.status === 'rejected' ? 'bg-rose-900/50 text-rose-400 border-rose-700' : 'bg-amber-900/50 text-amber-400 border-amber-700');
+                let badgeText = v.status === 'approved' ? 'อนุมัติแล้ว' : (v.status === 'rejected' ? 'ไม่อนุมัติ' : 'รอตรวจสอบ');
+
+                let card = document.createElement('div');
+                card.className = "bg-stone-900 border border-stone-700 rounded-xl p-4 flex flex-col sm:flex-row gap-4 items-center justify-between";
+                card.innerHTML = `
+                    <div class="flex items-center gap-4 w-full sm:w-auto">
+                        <img src="${v.img}" class="w-16 h-16 rounded-lg object-cover border border-stone-700">
+                        <div>
+                            <h4 class="text-sm font-bold text-stone-100">${v.title}</h4>
+                            <p class="text-xs text-stone-400">โดย: ${v.studentName} | <span class="text-amber-400 font-medium">${v.hours} ชั่วโมง</span></p>
+                            <span class="inline-block mt-1.5 px-2.5 py-0.5 rounded text-xs border ${badgeColor}">${badgeText}</span>
+                        </div>
+                    </div>
+                    ${currentUser.role === 'teacher' && v.status === 'pending' ? `
+                        <div class="flex gap-2 w-full sm:w-auto justify-end">
+                            <button onclick="updateVolStatus('${v.id}', 'approved')" class="bg-emerald-700 hover:bg-emerald-600 text-white text-xs px-3 py-1.5 rounded-lg transition">อนุมัติ</button>
+                            <button onclick="updateVolStatus('${v.id}', 'rejected')" class="bg-rose-700 hover:bg-rose-600 text-white text-xs px-3 py-1.5 rounded-lg transition">ปฏิเสธ</button>
+                        </div>
+                    ` : ''}
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // --- PROFILE LOGIC ---
+        function updateProfileImage(event) {
+            let reader = new FileReader();
+            if(event.target.files && event.target.files[0]) {
+                reader.readAsDataURL(event.target.files[0]);
+                reader.onload = function(e) {
+                    currentUser.img = e.target.result;
+                    let targetStu = students.find(s => s.id === currentUser.id);
+                    if(targetStu) targetStu.img = currentUser.img;
+                    saveData();
+                    renderProfile();
+                }
+            }
+        }
+
+        function renderProfile() {
+            document.getElementById('profile-img-preview').src = currentUser.img || 'https://via.placeholder.com/150';
+            document.getElementById('profile-name').innerText = currentUser.name;
+            document.getElementById('profile-id-year').innerText = `รหัส: ${currentUser.id} | ${currentUser.year}`;
+            document.getElementById('profile-role-badge').innerText = currentUser.role === 'teacher' ? 'คุณครู (Admin)' : (currentUser.role === 'head' ? 'หัวหน้าหมู่' : 'นศท. ทั่วไป');
+
+            let approvedHours = volunteers.filter(v => v.studentId === currentUser.id && v.status === 'approved').reduce((sum, v) => sum + v.hours, 0);
+            let absences = countAbsences(currentUser.id);
+
+            document.getElementById('profile-total-vol').innerText = `${approvedHours} ชม.`;
+            document.getElementById('profile-total-absence').innerText = `${absences} ครั้ง`;
+        }
+
+        // --- TEACHER TOOLS LOGIC ---
+        function handleBulkImport() {
+            let text = document.getElementById('import-csv-text').value.trim();
+            if(!text) { alert('กรุณากรอกข้อมูลที่ต้องการนำเข้า'); return; }
+
+            let lines = text.split('\n');
+            let count = 0;
+            lines.forEach(line => {
+                let parts = line.split(',').map(p => p.trim());
+                if(parts.length >= 3) {
+                    let id = parts[0];
+                    let name = parts[1];
+                    let year = parts[2];
+                    let role = parts[3] || 'student';
+
+                    if(!students.some(s => s.id === id)) {
+                        students.push({ id, name, year, role, img: 'https://via.placeholder.com/150' });
+                        count++;
+                    }
+                }
+            });
+
+            saveData();
+            alert(`นำเข้ารายชื่อสำเร็จ ${count} คน`);
+            document.getElementById('import-csv-text').value = '';
+            renderTeacherManageTable();
+            renderAttendanceTable();
+        }
+
+        function updateStudentRole(studentId, newRole) {
+            let s = students.find(item => item.id === studentId);
+            if(s) {
+                s.role = newRole;
+                saveData();
+                renderTeacherManageTable();
+            }
+        }
+
+        function deleteStudent(studentId) {
+            if(confirm('คุณต้องการลบรายชื่อ นศท. ออกจากระบบใช่หรือไม่?')) {
+                students = students.filter(s => s.id !== studentId);
+                saveData();
+                renderTeacherManageTable();
+                renderAttendanceTable();
+            }
+        }
+
+        function renderTeacherManageTable() {
+            let tbody = document.getElementById('teacher-manage-tbody');
+            tbody.innerHTML = '';
+
+            students.forEach(s => {
+                let absences = countAbsences(s.id);
+                let isLocked = absences > 4;
+
+                let row = document.createElement('tr');
+                row.className = "hover:bg-stone-750 transition";
+                row.innerHTML = `
+                    <td class="p-3 font-mono text-stone-300">${s.id}</td>
+                    <td class="p-3 font-medium text-stone-100">${s.name}</td>
+                    <td class="p-3 text-stone-300">${s.year}</td>
+                    <td class="p-3">
+                        <select onchange="updateStudentRole('${s.id}', this.value)" class="bg-stone-800 border border-stone-700 rounded px-2 py-1 text-xs text-stone-200">
+                            <option value="student" ${s.role==='student'?'selected':''}>นศท. ทั่วไป</option>
+                            <option value="head" ${s.role==='head'?'selected':''}>หัวหน้าหมู่</option>
+                            <option value="teacher" ${s.role==='teacher'?'selected':''}>คุณครู</option>
+                        </select>
+                    </td>
+                    <td class="p-3 text-center font-bold ${absences>4?'text-rose-400':'text-stone-300'}">${absences} ครั้ง</td>
+                    <td class="p-3 text-center">
+                        ${isLocked ? '<span class="text-rose-400 font-semibold text-xs">⚠️ ล็อก (ขาด>4)</span>' : '<span class="text-emerald-400 text-xs">✅ ปกติ</span>'}
+                    </td>
+                    <td class="p-3 text-center">
+                        <button onclick="deleteStudent('${s.id}')" class="bg-rose-700 hover:bg-rose-600 text-white px-2 py-1 rounded text-xs transition">ลบรายชื่อ</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // --- APP INITIALIZER ---
+        function renderApp() {
+            let navUserSec = document.getElementById('nav-user-section');
+            let viewAuth = document.getElementById('view-auth');
+            let viewDash = document.getElementById('view-dashboard');
+            let teacherTabBtn = document.getElementById('m-tab-tch');
+
+            if(!currentUser) {
+                viewAuth.classList.remove('hidden');
+                viewDash.classList.add('hidden');
+                navUserSec.innerHTML = '';
+            } else {
+                viewAuth.classList.add('hidden');
+                viewDash.classList.remove('hidden');
+
+                navUserSec.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <img src="${currentUser.img || 'https://via.placeholder.com/150'}" class="w-9 h-9 rounded-full object-cover border border-amber-500">
+                        <div class="text-right hidden sm:block">
+                            <p class="text-xs font-bold text-stone-100">${currentUser.name}</p>
+                            <p class="text-[10px] text-amber-400">${currentUser.year} (${currentUser.role === 'teacher' ? 'คุณครู' : (currentUser.role === 'head' ? 'หัวหน้าหมู่' : 'นศท.')})</p>
+                        </div>
+                        <button onclick="handleLogout()" class="bg-stone-700 hover:bg-stone-600 text-stone-300 text-xs px-3 py-1.5 rounded-lg transition ml-2">ออกจากระบบ</button>
+                    </div>
+                `;
+
+                if(currentUser.role === 'teacher') {
+                    teacherTabBtn.classList.remove('hidden');
+                    renderTeacherManageTable();
+                } else {
+                    teacherTabBtn.classList.add('hidden');
+                }
+
+                renderAttendanceTable();
+                renderVolunteerList();
+                renderProfile();
+            }
+        }
+
+        // โหลดเริ่มต้น
+        renderApp();
+    </script>
+</body>
+</html>
